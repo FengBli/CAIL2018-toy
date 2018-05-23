@@ -17,9 +17,10 @@ python version: 3.x
 import os
 import json
 import re
-import thulac     # Tsinghua Chinese word segementation tool
+import jieba
+# import thulac     # Tsinghua Chinese word segementation tool
 from util import *  # DATA_DIR, list2str_unicode_version
-from sklearn.feature_extraction.text import TfidfVectorizer
+# from sklearn.feature_extraction.text import TfidfVectorizer
 
 LIFE_IMPRISONMENT = 600
 DEATH_IMPRISONMENT = 800
@@ -38,8 +39,8 @@ class Preprocess(object):
         :stopwords_fname:   stopwords file location
         """
         self.data_dir = data_dir
-        self.thulac = thulac.thulac(seg_only=True,  # 只分词，不标注词性
-                                    filt=False)      # 不使用过滤器过滤无意义词语
+        # self.thulac = thulac.thulac(seg_only=True,  # 只分词，不标注词性
+        #                             filt=False)      # 不使用过滤器过滤无意义词语
         # self.corpus = []
         # self.vectorizer = TfidfVectorizer()
 
@@ -111,12 +112,44 @@ class Preprocess(object):
             print(".csv file dumped.")
 
 
+    def handle(self, line):
+        # 去掉日期
+        line = re.sub("\d*年\d*月\d*日", "", line)
+
+        # using thulac
+        # text = self.thulac.cut(line,
+        #                        text=True)   # 返回分词文本，否则返回二维数组
+
+        word_list = jieba.cut(line)
+
+        # remove the stopwords
+        words = []
+        for word in word_list:
+            if word not in self.stopwords_set:
+                words.append(word)
+
+        text = " ".join(words)
+
+        # 修正局部分词结果
+        # 将「王」和「某某」合并为「王某某」
+        text = re.sub(" 某某", "某某", text)
+
+        # 将「2000」和「元」合并为「2000元」
+        text = re.sub(" 元", "元", text)
+        text = re.sub(" 余元", "元", text)
+
+        text = re.sub("价 格", "价格", text)
+
+        # self.corpus.append(text)
+        return text
+
     def run(self):
         for fname in os.listdir(self.data_dir):
             if ".json" in fname:
                 fname = os.path.join(self.data_dir, fname)
-
+                print("handling {}...".format(fname), end="")
                 self.json2csv(fname)
+                print("done")
 
         # self.tfidf = self.vectorizer.fit_transform(self.corpus)
         # print("shape: {}".format(self.tfidf.shape))
@@ -129,40 +162,8 @@ class Preprocess(object):
         #             print(u"{}, {}".format(words[j], self.tfidf[i, j]))
 
 
-    def handle(self, line):
-        # 去掉日期
-        line = re.sub("\d*年\d*月\d*日", "", line)
-
-        # using thulac
-        text = self.thulac.cut(line,
-                               text=True)   # 返回分词文本，否则返回二维数组
-
-        # 修正局部分词结果
-
-        # 将「王」和「某某」合并为「王某某」
-        text = re.sub(" 某某", u"某某", text)
-
-        # 将「2000」和「元」合并为「2000元」
-        text = re.sub(" 元", u"元", text)
-        text = re.sub(" 余元", u"元", text)
-
-
-        text = re.sub("价 格", "价格", text)
-
-        words = text.split(" ")
-
-        # remove the stopwords
-        res = []
-        for word in words:
-            if word not in self.stopwords_set:
-                res.append(word)
-
-
-        # self.corpus.append(text)
-
-        return " ".join(res)
-
 if __name__ == "__main__":
     # fdir = os.path.join(DATA_DIR, "test/")
-    handler = Preprocess(DATA_DIR, stopwords_fname="./stopwords.txt")
+    # handler = Preprocess(fdir, stopwords_fname="./stopwords.txt")
+    handler = Preprocess(data_dir=DATA_DIR, stopwords_fname="./stopwords.txt")
     handler.run()

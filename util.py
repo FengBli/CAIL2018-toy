@@ -19,4 +19,4 @@ def list2str_unicode_version(lst):
     if len(lst) == 1:
         return "[{}]".format(lst[0])
     else:
-        return "[{}]".format(", ".join(lst))
+        return "[{}]".format(", ".join(str(lst)))
