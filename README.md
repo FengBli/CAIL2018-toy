@@ -15,10 +15,12 @@
 
 ### 2018-05-18
 - 数据文件太大，将文件夹从项目中删除
+- 默认数据目录为`../data/CAIL2018-small-data`，见`util.py`文件`DATA_DIR`常量
 - 使用清华中文分词工具[thulac-python](https://github.com/thunlp/THULAC-Python)
 - **Notice**：法条预测中，有些案件对应多个法条
 - 添加`util.py`文件
-- 添加`preprocess.py`文件，对数据进行中文分词
+- 添加`preprocess.py`文件，对数据进行中文分词，整合json2csv文件函数
+- 添加`stopwords.txt`文件，来源[GitHub·stopwords-iso/stopwords-zh](https://github.com/stopwords-iso/stopwords-zh)
 
 ## 团队成员
 
