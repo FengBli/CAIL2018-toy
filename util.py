@@ -7,6 +7,8 @@ DATA_DIR  = "../data/CAIL2018-small-data"
 
 BR = "\n"
 
+SEP = "\x00"
+
 # print something log info or not
 DEBUG = True
 
@@ -19,4 +21,4 @@ def list2str_unicode_version(lst):
     if len(lst) == 1:
         return "[{}]".format(lst[0])
     else:
-        return "[{}]".format(", ".join(str(lst)))
+        return "[{}]".format(", ".join([str(item) for item in lst]))
