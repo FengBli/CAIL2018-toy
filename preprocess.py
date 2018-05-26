@@ -19,8 +19,7 @@ import json
 import re
 import jieba
 # import thulac     # Tsinghua Chinese word segementation tool
-from util import *  # DATA_DIR, list2str_unicode_version
-# from sklearn.feature_extraction.text import TfidfVectorizer
+from util import *  # DATA_DIR, list2str_unicode_version, SEP
 
 LIFE_IMPRISONMENT = 600
 DEATH_IMPRISONMENT = 800
@@ -28,6 +27,10 @@ DEATH_IMPRISONMENT = 800
 
 TITLE = u"fact\x00criminal\x00money\x00accusations\x00articles\x00imprisonment"
 DATA_FORMAT = u"{}\x00{}\x00{}\x00{}\x00{}\x00{}"
+
+
+jieba.load_userdict("./dictionary/userdict.txt")
+jieba.enable_parallel(4)
 
 
 class Preprocess(object):
@@ -41,8 +44,6 @@ class Preprocess(object):
         self.data_dir = data_dir
         # self.thulac = thulac.thulac(seg_only=True,  # 只分词，不标注词性
         #                             filt=False)      # 不使用过滤器过滤无意义词语
-        # self.corpus = []
-        # self.vectorizer = TfidfVectorizer()
 
         self.load_stopwords(stopwords_fname)
 
@@ -109,12 +110,12 @@ class Preprocess(object):
 
         fcsv.close()
         if DEBUG:
-            print(".csv file dumped.")
+            print("csv file dumped.")
 
 
     def handle(self, line):
         # 去掉日期
-        line = re.sub("\d*年\d*月\d*日", "", line)
+        line = re.sub(r"\d*年\d*月\d*日", "", line)
 
         # using thulac
         # text = self.thulac.cut(line,
@@ -140,26 +141,15 @@ class Preprocess(object):
 
         text = re.sub("价 格", "价格", text)
 
-        # self.corpus.append(text)
         return text
 
     def run(self):
         for fname in os.listdir(self.data_dir):
             if ".json" in fname:
                 fname = os.path.join(self.data_dir, fname)
-                print("handling {}...".format(fname), end="")
+                if DEBUG:
+                    print("handling {}...".format(fname))
                 self.json2csv(fname)
-                print("done")
-
-        # self.tfidf = self.vectorizer.fit_transform(self.corpus)
-        # print("shape: {}".format(self.tfidf.shape))
-
-        # words = self.vectorizer.get_feature_names()
-        # for i in xrange(len(self.corpus)):
-        #     print("--------Document {}----------".format(i))
-        #     for j in xrange(len(words)):
-        #         if self.tfidf[i, j] > 1e-3:
-        #             print(u"{}, {}".format(words[j], self.tfidf[i, j]))
 
 
 if __name__ == "__main__":
