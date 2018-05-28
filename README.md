@@ -30,6 +30,11 @@
 - 添加`dictionary/`文件夹，包含用户词典及由`.scel`(搜狗的用户词典文件)文件解码处理的代码
 - 修正`util.py`中的24行的一处bug
 
+### 2018-05-28  [feng]
+- 重新组织代码结构，依照官方提供[svm_baseline](https://github.com/thunlp/CAIL2018/tree/master/baseline)代码
+- 删除`preprocess.py`
+- 添加`train.py`文件, `./predictor/`目录等
+
 ## 团队成员
 
 Team name: 陈-冯-杨
