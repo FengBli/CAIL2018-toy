@@ -5,11 +5,11 @@
 
 ## 2. Time nodes
 - 第一阶段（2018.05.15-2018.07.14）:
- - ~ 6月 5日，基于Small数据的模型提交截至。向评测结果高于基准算法成绩的团队发布Large数据
- - ~ 6月12日，基于Large-test数据对前期模型进行重新评测刷榜
- - ~ 7月14日，最终模型提交截至。
+    - ~ 6月 5日，基于Small数据的模型提交截至。向评测结果高于基准算法成绩的团队发布Large数据
+    - ~ 6月12日，基于Large-test数据对前期模型进行重新评测刷榜
+    - ~ 7月14日，最终模型提交截至。
 - 第二阶段（2018.07.14-2018.08.14）:
- - 主办方根据一个月的新增数据对最终模型进行封闭评测
+    - 主办方根据一个月的新增数据对最终模型进行封闭评测
 
 ## 3. Notice
 ### 3.1. Necessary adjustment
@@ -21,12 +21,12 @@
 ### 3.2. Requirement
 
 - Language Environment
- - Python 3.5
+    - Python 3.5
 
 - Packages
- - jieba
- - pandas
- - sklearn
+    - jieba
+    - pandas
+    - sklearn
 
 ### 3.3. Unfinished Parts
 - `./preprocess/*`
@@ -57,9 +57,9 @@
 
 ### 2018-06-01  [feng]
 - 重新组织代码结构：
- - 将`uti.py`,`law.txt`, `accu.txt`, `userdict.txt`等文件均放入`./utils/`目录下
- - 现有的`./predictor/`目录在模型训练完后，即可直接打包提交
- - 添加本地测试与跑分文件：`./test.py`和`./score.py`
+    - 将`uti.py`,`law.txt`, `accu.txt`, `userdict.txt`等文件均放入`./utils/`目录下
+    - 现有的`./predictor/`目录在模型训练完后，即可直接打包提交
+    - 添加本地测试与跑分文件：`./test.py`和`./score.py`
 
 ## 5. TODOs
 - 考虑将停用词处理放入TD-IDF模型内部
@@ -73,7 +73,7 @@
 |------|------|------|-----------|
 |71.83 |68.79 |47.83 |188.45     |
 
-### 1<super>st</super> uploads using `linearSVC`
+### 1<sup>st</sup> upload using `linearSVC`
 
 succeeded after 8 stupid attempts by [@FengBlil](https://github.com/FengBli)
 
@@ -83,7 +83,7 @@ date: 05-31
 |------|------|------|-----------|
 |72.92 |69.43 |52.56 |194.92     |
 
-### 2<super>nd</super> uploads using `RandomForestClassifier`
+### 2<sup>nd</sup> upload using `RandomForestClassifier`
 
 date: 06-01
 
