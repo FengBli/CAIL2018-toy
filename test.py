@@ -3,17 +3,13 @@
 
 import json
 import os
-import util
+from utils import util
 import multiprocessing
 
 from predictor import Predictor
 
 data_path = "input_path"  # The directory of the input data
 output_path = "output_path"  # The directory of the output data
-
-# TODO: for testing, delete these two lines before commit
-data_path = os.path.join(util.DATA_DIR, "test/")
-output_path = os.path.join(util.DATA_DIR, "output/")
 
 def format_result(result):
     rex = {"accusation": [], "articles": [], "imprisonment": -3}
@@ -53,7 +49,6 @@ if __name__ == "__main__":
 
     def solve(fact):
         result = user.predict(fact)
-        print("length of result in sovle() = {}".format(len(result)))
 
         for a in range(0, len(result)):
             result[a] = format_result(result[a])
@@ -70,21 +65,21 @@ if __name__ == "__main__":
         for line in inf:
             fact.append(json.loads(line)["fact"])
             if len(fact) == get_batch():
-                print("get batch process")  # TODO: delete it!
                 result = solve(fact)
                 cnt += len(result)
                 for x in result:
                     print(json.dumps(x), file=ouf)
                 fact = []
 
-        print("fact length = {}".format(len(fact)))
-
         if len(fact) != 0:
             result = solve(fact)
             cnt += len(result)
-            print("result length = {}".format(len(result)))   # TODO: delete it!
             for x in result:
                 print(json.dumps(x), file=ouf)
             fact = []
 
-ouf.close()
+        inf.close()
+        ouf.close()
+    if utils.DEBUG:
+        print("DEBUG: prediction work finished.")
+
