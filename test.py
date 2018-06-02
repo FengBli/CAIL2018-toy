@@ -80,6 +80,6 @@ if __name__ == "__main__":
 
         inf.close()
         ouf.close()
-    if utils.DEBUG:
+    if util.DEBUG:
         print("DEBUG: prediction work finished.")
 
