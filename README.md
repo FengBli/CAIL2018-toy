@@ -14,6 +14,7 @@
 ## 3. Notice
 ### 3.1. Necessary adjustment
 在将本项目代码clone或download到本地运行时，需要对如下文件处做简单修改：
+- 在`./predictor`中创建`model/`目录（github上无法上传空文件夹）
 - `./utils/util.py`中的第9行`DATA_DIR`，改为本地数据文件所在目录
 - 运行`./test.py`前，将第11行改为测试文件所在目录，第12行改为测试输出结果存放目录
 - 运行`./score.py`前，将第187行改为上述测试文件所在目录，第188行改为测试输出结果存放目录
