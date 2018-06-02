@@ -62,9 +62,10 @@ def load_stopwords(stopwords_fname):
 
 stopwords = None
 
+jieba.load_userdict("./dictionary/userdict.txt")
+
 def cut_line(line):
     """ cut the single line using `jieba` """
-    jieba.load_userdict("./dictionary/userdict.txt")
 
     global stopwords
 
