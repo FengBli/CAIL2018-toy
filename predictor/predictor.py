@@ -37,6 +37,7 @@ DEBUG = True
 
 stopwords = None
 
+jieba.load_userdict(USER_DICT_LOC)
 
 def load_stopwords(stopwords_fname):
     """ load stopwords into set from local file
@@ -54,7 +55,6 @@ def cut_line(line):
     """ cut the single line using `jieba`
     duplicated in `./utils/util.py`, but needed for convenience
     """
-    jieba.load_userdict(USER_DICT_LOC)
 
     global stopwords
 
