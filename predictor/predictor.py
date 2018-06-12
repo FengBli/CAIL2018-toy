@@ -142,5 +142,3 @@ class Predictor(object):
             result.append(ans)
         return result
 
-
-
