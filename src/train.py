@@ -9,13 +9,15 @@ import os
 import json
 import pickle
 from utils import util
+from datetime import datetime as dt
 
 import pandas as pd
 from sklearn.svm import LinearSVC
 from sklearn.externals import joblib
 from sklearn.ensemble import RandomForestClassifier as RFC
 from sklearn.feature_extraction.text import TfidfVectorizer as TFIDF
-
+import xgboost as xgb
+import scipy
 
 DIM = 5000
 
@@ -26,24 +28,33 @@ class Model(object):
     def __init__(self):
         pass
 
-    def train(self,train_fname):
+    def train(self, train_fname):
         """ load training data from local file and train the model """
+        pre = dt.now()
         facts, accu_label, article_label, imprison_label = self.load_data(train_fname)  # all in `pandas.Series` form
+        if util.DEBUG:
+            print("DEBUG: load data finished.")
         tfidf = self.train_tfidf(facts)
         train_vector = tfidf.transform(facts)
+        if util.DEBUG:
+            print("DEBUG: make tfidf model finished.")
+            print("utill now time cost:", (dt.now() - pre).seconds, 's.')
 
         # learn models
-        accu_model = self.get_model(train_vector, accu_label)
+        accu_model = self.get_model('accu', train_vector, accu_label)
         if util.DEBUG:
             print("DEBUG: accusation model learnt.")
+            print("utill now time cost:", (dt.now() - pre).seconds, 's.')
 
-        article_model = self.get_model(train_vector, article_label)
+        article_model = self.get_model('article', train_vector, article_label)
         if util.DEBUG:
             print("DEBUG: article model learnt.")
+            print("utill now time cost:", (dt.now() - pre).seconds, 's.')
 
-        imprison_model = self.get_model(train_vector, imprison_label)
+        imprison_model = self.get_model('imprison', train_vector, imprison_label)
         if util.DEBUG:
             print("DEBUG: imprisonment model learnt.")
+            print("utill now time cost:", (dt.now() - pre).seconds, 's.')
 
         # dump models
         joblib.dump(tfidf, util.TFIDF_LOC)
@@ -53,22 +64,36 @@ class Model(object):
 
         if util.DEBUG:
             print("DEBUG: models dumped.")
+            print("utill now time cost:", (dt.now() - pre).seconds, 's.')
 
-
-    def get_model(self, train_vector, label):
+    def get_model(self, kind, train_vector, labels):
         """ train models for different tasks with  different vetors and labels """
         # model = LinearSVC()
-        model = RFC()   # random forest classifier
-
-        model.fit(train_vector, label)
+        if kind == 'accu' or kind == 'imprison':
+            model = RFC()  # random forest classifier
+            model.fit(train_vector, labels)
+        else :
+            csr = scipy.sparse.csr_matrix(train_vector, train_vector.shape)
+            dtrain = xgb.DMatrix(csr, label=labels)
+            param = {}
+            # use softmax multi-class classification
+            param['objective'] = 'multi:softmax'
+            # scale weight of positive examples
+            param['eta'] = 0.1
+            param['max_depth'] = 6
+            param['silent'] = 1
+            param['nthread'] = 2
+            param['num_class'] = 184  # kind of laws!
+            num_round = 5
+            model = xgb.train(param, dtrain, num_round)
         return model
 
     def train_tfidf(self, facts):
         """ train the TFIDF vectorizer model """
         tfidf = TFIDF(
-            min_df = 5,
-            max_features = DIM,
-            ngram_range = (1, 3)
+            min_df=5,
+            max_features=DIM,
+            ngram_range=(1, 3)
         )
         tfidf.fit(facts)
 
@@ -84,7 +109,7 @@ class Model(object):
         article_label = []
         imprison_label = []
 
-        with open(train_fname, 'r') as f:
+        with open(train_fname, 'r', encoding='utf-8') as f:
             line = f.readline()
             while line:
                 line_dict = json.loads(line, encoding="utf-8")
@@ -141,10 +166,9 @@ class Model(object):
         return facts.apply(util.cut_line)
 
 
-
 if __name__ == '__main__':
     model = Model()
-    # model.train(os.path.join(util.DATA_DIR, util.TRAIN_FNAME))
-    model.train(os.path.join(util.DATA_DIR, util.SAMPLE_FNAME))
+    model.train(os.path.join(util.DATA_DIR, util.TRAIN_FNAME))
+    # model.train(os.path.join(util.DATA_DIR, util.SAMPLE_FNAME))
     if util.DEBUG:
         print("DEBUG: training finished.")

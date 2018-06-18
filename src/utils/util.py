@@ -1,30 +1,30 @@
-#!usr/bin/env python
+#!usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import re
-import jieba
 import json
+import jieba
 
 # the directory where the data lies
-DATA_DIR  = "../../data/CAIL2018-small-data/"
+DATA_DIR = "../data/CAIL2018-small-data/"
 
 # training file name
 TRAIN_FNAME = "data_train.json"
 
-# sample date file name
+# sample data file name
 SAMPLE_FNAME = "data_sample.json"
 
 # testing file name
 TEST_FNAME = "data_test.json"
 
 # location of `law.txt` file
-LAW_FILE_LOC = "../law.txt"
+LAW_FILE_LOC = "./utils/law.txt"
 
 # location of `accu.txt` file
-ACCU_FILE_LOC = "../accu.txt"
+ACCU_FILE_LOC = "./utils/accu.txt"
 
 # the location of stopwords
-STOPWORDS_LOC = "../stopwords.txt"
+STOPWORDS_LOC = "./utils/stopwords.txt"
 
 # TF-IDF model dumped file location
 TFIDF_LOC = "./predictor/model/tfidf.model"
@@ -38,6 +38,9 @@ ART_LOC = "./predictor/model/article.model"
 # imprisonment model dumped file location
 IMPRISON_LOC = "./predictor/model/imprisonment.model"
 
+# mid data location
+MID_DATA_PKL_FILE_LOC = "./utils/mid-data.pkl"
+
 # dump the mid-data to local `.pkl` file or not
 DUMP = False
 
@@ -48,13 +51,11 @@ DEBUG = True
 DEATH_IMPRISONMENT = -2
 LIFE_IMPRISONMENT = -1
 
-jieba.load_userdict("../dictionary/userdict.txt")
-
 
 def load_stopwords(stopwords_fname):
     """ load stopwords into set from local file """
     stopwords = set()
-    with open(stopwords_fname, "r") as f:
+    with open(stopwords_fname, "r", encoding="utf-8") as f:
         for line in f.readlines():
             stopwords.add(line.strip())
 
@@ -62,6 +63,9 @@ def load_stopwords(stopwords_fname):
 
 
 stopwords = None
+
+jieba.load_userdict("./dictionary/userdict.txt")
+
 
 def cut_line(line):
     """ cut the single line using `jieba` """
@@ -76,11 +80,14 @@ def cut_line(line):
     word_list = jieba.cut(line)
 
     if stopwords is None:
-        print("stopwords loaded.")
+        print("DEBUG: stopwords loaded.")
         stopwords = load_stopwords(STOPWORDS_LOC)
 
     # remove the stopwords
-    words = [word for word in word_list and word not in stopwords]
+    words = []
+    for word in word_list:
+        if word not in stopwords:
+            words.append(word)
 
     text = " ".join(words)
 
@@ -108,7 +115,6 @@ def load_law_and_accu_index():
             law[line.strip()] = len(law)
             line = f.readline()
 
-
     accu = {}
     accuname = {}
     with open(ACCU_FILE_LOC, "r", encoding="utf-8") as f:
@@ -118,12 +124,14 @@ def load_law_and_accu_index():
             accu[line.strip()] = len(accu)
             line = f.readline()
 
-    if DEBUG:
-        print("law and accusation files loaded.")
     return law, accu, lawname, accuname
 
 
 law, accu, lawname, accuname = load_law_and_accu_index()
+# cnt = 0
+# for i in lawname:
+#     print(cnt, ':', i)
+#     cnt += 1
 
 
 def get_class_num(kind):
@@ -175,4 +183,3 @@ def get_label(d, kind):
         return get_time(d["meta"]["term_of_imprisonment"])
     else:
         raise KeyError
-

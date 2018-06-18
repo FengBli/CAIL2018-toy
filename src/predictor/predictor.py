@@ -13,6 +13,8 @@ import json
 import jieba
 import pandas as pd
 from sklearn.externals import joblib
+import xgboost as xgb
+import scipy
 
 # TF-IDF model dumped file location
 TFIDF_LOC = "./predictor/model/tfidf.model"
@@ -38,6 +40,7 @@ DEBUG = True
 stopwords = None
 
 jieba.load_userdict(USER_DICT_LOC)
+
 
 def load_stopwords(stopwords_fname):
     """ load stopwords into set from local file
@@ -89,9 +92,9 @@ def cut_line(line):
     return text
 
 
-
 class Predictor(object):
     """ Predictor class required for submission """
+
     def __init__(self):
         self.batch_size = 256
 
@@ -133,7 +136,9 @@ class Predictor(object):
         for vector in vectors:
             ans = dict()
 
-            ans["articles"] = self.predict_article(vector)
+            csr = scipy.sparse.csr_matrix(vector, vector.shape)
+            dtrain = xgb.DMatrix(csr)
+            ans["articles"] = self.predict_article(dtrain)
 
             ans["accusation"] = self.predict_accusation(vector)
 
@@ -141,4 +146,3 @@ class Predictor(object):
 
             result.append(ans)
         return result
-

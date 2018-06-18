@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from datetime import datetime as dt
+
+start = dt.now()
+
 import json
 import os
 from utils import util
@@ -8,8 +12,12 @@ import multiprocessing
 
 from predictor import Predictor
 
-data_path = "input_path"  # The directory of the input data
-output_path = "output_path"  # The directory of the output data
+point1 = dt.now()
+
+
+data_path = "../data/CAIL2018-small-data/test_data"  # The directory of the input data
+output_path = "../data/CAIL2018-small-data/test_result"  # The directory of the output data
+
 
 def format_result(result):
     rex = {"accusation": [], "articles": [], "imprisonment": -3}
@@ -55,10 +63,12 @@ if __name__ == "__main__":
 
         return result
 
+    if util.DEBUG:
+        print("start predict...")
 
     for file_name in os.listdir(data_path):
-        inf = open(os.path.join(data_path, file_name), "r")
-        ouf = open(os.path.join(output_path, file_name), "w")
+        inf = open(os.path.join(data_path, file_name), "r", encoding='utf-8')
+        ouf = open(os.path.join(output_path, file_name), "w", encoding='utf-8')
 
         fact = []
 
@@ -82,4 +92,3 @@ if __name__ == "__main__":
         ouf.close()
     if util.DEBUG:
         print("DEBUG: prediction work finished.")
-
