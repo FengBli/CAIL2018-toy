@@ -4,12 +4,13 @@ import json
 import sys
 from utils import util
 
+
 class Judger:
     # Initialize Judger, with the path of accusation list and law articles list
     def __init__(self, accusation_path, law_path):
         self.accu_dic = {}
 
-        f = open(accusation_path, "r")
+        f = open(accusation_path, "r", encoding='utf-8')
         self.task1_cnt = 0
         for line in f:
             self.task1_cnt += 1
@@ -170,8 +171,8 @@ class Judger:
         result[2] = {"cnt": 0, "score": 0}
 
         for file_name in os.listdir(truth_path):
-            inf = open(os.path.join(truth_path, file_name), "r")
-            ouf = open(os.path.join(output_path, file_name), "r")
+            inf = open(os.path.join(truth_path, file_name), "r", encoding='utf-8')
+            ouf = open(os.path.join(output_path, file_name), "r", encoding='utf-8')
 
             for line in inf:
                 ground_truth = json.loads(line)["meta"]
@@ -182,10 +183,11 @@ class Judger:
 
         return result
 
+
 if __name__ == "__main__":
     # TODO: for testing only
-    truth_path = os.path.join(util.DATA_DIR, "./test")
-    output_path = os.path.join(util.DATA_DIR, "./output")
+    truth_path = os.path.join(util.DATA_DIR, "test/")
+    output_path = os.path.join(util.DATA_DIR, "output/")
 
     judger = Judger(util.ACCU_FILE_LOC, util.LAW_FILE_LOC)
 

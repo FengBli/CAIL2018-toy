@@ -8,8 +8,9 @@ import multiprocessing
 
 from predictor import Predictor
 
-data_path = "input_path"  # The directory of the input data
-output_path = "output_path"  # The directory of the output data
+data_path = "./cail_0518/test/"  # The directory of the input data
+output_path = "./cail_0518/output/"  # The directory of the output data
+
 
 def format_result(result):
     rex = {"accusation": [], "articles": [], "imprisonment": -3}
@@ -57,8 +58,8 @@ if __name__ == "__main__":
 
 
     for file_name in os.listdir(data_path):
-        inf = open(os.path.join(data_path, file_name), "r")
-        ouf = open(os.path.join(output_path, file_name), "w")
+        inf = open(os.path.join(data_path, file_name), "r", encoding='utf-8')
+        ouf = open(os.path.join(output_path, file_name), "w", encoding='utf-8')
 
         fact = []
 
