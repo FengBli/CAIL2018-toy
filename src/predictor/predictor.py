@@ -11,8 +11,14 @@ import os
 import re
 import json
 import jieba
+import numpy as np
 import pandas as pd
 from sklearn.externals import joblib
+from keras.models import load_model
+from keras.preprocessing.sequence import pad_sequences
+from pprint import pprint
+import scipy
+import h5py
 
 # TF-IDF model dumped file location
 TFIDF_LOC = "./predictor/model/tfidf.model"
@@ -20,8 +26,11 @@ TFIDF_LOC = "./predictor/model/tfidf.model"
 # accusation model dumped file location
 ACCU_LOC = "./predictor/model/accusation.model"
 
+# Keras Tokenizer model dumped file location
+TOKEN_LOC = "./predictor/model/token.model"
+
 # article model dumped file location
-ART_LOC = "./predictor/model/article.model"
+ART_LOC = "./predictor/model/article.h5"
 
 # imprisonment model dumped file location
 IMPRISON_LOC = "./predictor/model/imprisonment.model"
@@ -38,6 +47,7 @@ DEBUG = True
 stopwords = None
 
 jieba.load_userdict(USER_DICT_LOC)
+
 
 def load_stopwords(stopwords_fname):
     """ load stopwords into set from local file
@@ -89,9 +99,9 @@ def cut_line(line):
     return text
 
 
-
 class Predictor(object):
     """ Predictor class required for submission """
+
     def __init__(self):
         self.batch_size = 256
 
@@ -99,7 +109,12 @@ class Predictor(object):
         if DEBUG:
             print("DEBUG: TF-IDF model loaded.")
 
-        self.article_model = joblib.load(ART_LOC)
+        self.token_model = joblib.load(TOKEN_LOC)
+        if DEBUG:
+            print("DEBUG:TOKEN model loaded.")
+
+        # self.article_model = joblib.load(ART_LOC)
+        self.article_model = load_model(ART_LOC)
         if DEBUG:
             print("DEBUG: article model loaded.")
 
@@ -111,9 +126,16 @@ class Predictor(object):
         if DEBUG:
             print("DEBUG: imprisonment model loaded.")
 
-    def predict_article(self, vector):
-        article = self.article_model.predict(vector)
-        return [article[0] + 1]
+    def predict_article(self, lst):
+        # print('inininnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn')
+        # pprint(lst)
+        # print('in shape: ', lst.shape)
+        article = self.article_model.predict(lst)
+        # pprint(article)
+        # print('art shape: ', article.shape)
+        index = np.argmax(article)
+        # print('index: ', index)
+        return [index + 1]
 
     def predict_accusation(self, vector):
         accusation = self.accusation_model.predict(vector)
@@ -130,10 +152,26 @@ class Predictor(object):
 
         vectors = self.tfidf_model.transform(facts_words)
 
-        for vector in vectors:
-            ans = dict()
+        lsts = self.token_model.texts_to_sequences(facts_words)
+        lsts = pad_sequences(lsts, maxlen=80, value=0)
 
-            ans["articles"] = self.predict_article(vector)
+        lens = len(lsts)
+
+        for index in range(lens):
+            vector = vectors[index]
+            lst = lsts[index]
+            ans = dict()
+            # pprint(vector)
+            # print('-----------------------')
+            # pprint(lst)
+            # print('lst shape: ', lst.shape)
+            """
+            TODO
+            """
+            # csr = scipy.sparse.csr_matrix(vector, vector.shape)
+            # dtrain = xgb.DMatrix(csr)
+            # ans["articles"] = self.predict_article(dtrain)
+            ans["articles"] = self.predict_article(np.array([lst]))
 
             ans["accusation"] = self.predict_accusation(vector)
 
@@ -141,4 +179,3 @@ class Predictor(object):
 
             result.append(ans)
         return result
-

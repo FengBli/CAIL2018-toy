@@ -1,2 +1,1 @@
 from .predictor import Predictor
-
