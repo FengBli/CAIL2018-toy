@@ -13,6 +13,11 @@ import json
 import jieba
 import pandas as pd
 from sklearn.externals import joblib
+from gensim.models.word2vec import Word2Vec
+from gensim.models.doc2vec import Doc2Vec
+import numpy as np
+
+
 
 # TF-IDF model dumped file location
 TFIDF_LOC = "./predictor/model/tfidf.model"
@@ -32,12 +37,28 @@ USER_DICT_LOC = "./predictor/userdict.txt"
 # location of stopwords file
 STOPWORDS_LOC = "./predictor/stopwords.txt"
 
+# D2V model location
+D2V_MODEL_DM = "./predictor/model/d2v_model_dm.model"
+
+# D2V model dbow location
+D2V_MODEL_DBOW = "./predictor/model/d2v_model_dbow.model"
+
+# W2V model
+W2V_MODEL = "./predictor/model/w2v_model.model"
+
 # print some log info or not
 DEBUG = True
 
 stopwords = None
 
 jieba.load_userdict(USER_DICT_LOC)
+
+
+def list_pdSeries(pdSeries):
+    # pdSeries是pandas.Series类型
+    for item in pdSeries.items():
+        yield item[0], item[1]
+
 
 def load_stopwords(stopwords_fname):
     """ load stopwords into set from local file
@@ -86,8 +107,9 @@ def cut_line(line):
 
     text = re.sub("价 格", "价格", text)
 
-    return text
+    text = text.strip().split()
 
+    return text
 
 
 class Predictor(object):
@@ -95,9 +117,9 @@ class Predictor(object):
     def __init__(self):
         self.batch_size = 256
 
-        self.tfidf_model = joblib.load(TFIDF_LOC)
-        if DEBUG:
-            print("DEBUG: TF-IDF model loaded.")
+        # self.tfidf_model = joblib.load(TFIDF_LOC)
+        # if DEBUG:
+        #     print("DEBUG: TF-IDF model loaded.")
 
         self.article_model = joblib.load(ART_LOC)
         if DEBUG:
@@ -110,6 +132,17 @@ class Predictor(object):
         self.imprisonment_model = joblib.load(IMPRISON_LOC)
         if DEBUG:
             print("DEBUG: imprisonment model loaded.")
+
+        '''
+        doc2vec model
+        '''
+        self.d2v_model_dm = Doc2Vec.load(D2V_MODEL_DM)
+        self.d2v_model_dbow = Doc2Vec.load(D2V_MODEL_DBOW)
+
+        '''
+        word2vec model
+        '''
+        self.w2v_model = Word2Vec.load(W2V_MODEL)
 
     def predict_article(self, vector):
         article = self.article_model.predict(vector)
@@ -125,10 +158,39 @@ class Predictor(object):
 
     def predict(self, content):
         result = []
+        vectors_dm = []
+        vectors_dbow = []
+        vectors = []
+        vector = []
 
         facts_words = pd.Series(content).apply(cut_line)
 
-        vectors = self.tfidf_model.transform(facts_words)
+        '''tfidf'''
+        # vectors = self.tfidf_model.transform(facts_words)
+
+        '''doc2vec'''
+        d2v_model_dm = self.d2v_model_dm
+        d2v_model_dbow = self.d2v_model_dbow
+
+        '''word2vec'''
+        w2v_model = self.w2v_model
+
+        # for _, fact in list_pdSeries(facts_words):
+        #     d2v = d2v_model_dm.infer_vector(fact)
+        #     vectors_dm.append(d2v)
+        #
+        # for _, fact in list_pdSeries(facts_words):
+        #     d2v = d2v_model_dbow.infer_vector(fact)
+        #     vectors_dbow.append(d2v)
+
+        for _, words in list_pdSeries(facts_words):
+            d2v = np.zeros(shape=(1, w2v_model.wv.vector_size))
+            count = 0.0
+            for word in words:
+                if word in w2v_model.wv.vocab:
+                    d2v += w2v_model.wv[word].reshape(1, -1)
+                    count += 1.0
+            vectors.append(d2v/count)
 
         for vector in vectors:
             ans = dict()
@@ -141,4 +203,20 @@ class Predictor(object):
 
             result.append(ans)
         return result
+
+        # for vector_dm, vector_dbow in zip(vectors_dm, vectors_dbow):
+        #     vector = np.concatenate((vector_dm, vector_dbow))
+        #     vector = [vector]
+        #     ans = dict()
+        #
+        #     ans["articles"] = self.predict_article(vector)
+        #
+        #     ans["accusation"] = self.predict_accusation(vector)
+        #
+        #     ans["imprisonment"] = self.predict_imprisonment(vector)
+        #
+        #     result.append(ans)
+        # return result
+
+
 
