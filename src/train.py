@@ -3,6 +3,8 @@
 
 """
 A template training code using LinearSVC for demenstration
+
+ADD: use xgboost model for task 2.
 """
 
 import os
@@ -70,21 +72,20 @@ class Model(object):
         """ train models for different tasks with  different vetors and labels """
         # model = LinearSVC()
         if kind == 'accu' or kind == 'imprison':
-            model = RFC()  # random forest classifier
+            model = LinearSVC()  # linear SVC classifier
             model.fit(train_vector, labels)
-        else :
+        else:
             csr = scipy.sparse.csr_matrix(train_vector, train_vector.shape)
             dtrain = xgb.DMatrix(csr, label=labels)
             param = {}
             # use softmax multi-class classification
             param['objective'] = 'multi:softmax'
             # scale weight of positive examples
-            param['eta'] = 0.1
+            param['eta'] = 0.05
             param['max_depth'] = 6
             param['silent'] = 1
-            param['nthread'] = 2
             param['num_class'] = 184  # kind of laws!
-            num_round = 5
+            num_round = 500
             model = xgb.train(param, dtrain, num_round)
         return model
 
