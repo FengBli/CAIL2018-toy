@@ -100,7 +100,7 @@ date: 06-15
 |------|------|------|-----------|
 |53.36 |51.72 |40.14 |145.22     |
 
-### 2<sup>nd</sup> upload using `word2vec`
+### 4<sup>nd</sup> upload using `word2vec`
 
 date: 06-18
 
