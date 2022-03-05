@@ -94,11 +94,9 @@ date: 06-01
 
 ## 7. Members
 
-Team: 陈-冯-杨
+Team Members:
+- [@mcorange1997](https://github.com/mcorange1997)
 
-Members:
-- 陈子彧 [@mcorange1997](https://github.com/mcorange1997)
+- [@FengBli](https://github.com/FengBli)
 
-- 冯柏淋 [@FengBli](https://github.com/FengBli)
-
-- 杨凌宇 [@Scott1123](https://github.com/Scott1123)
+- [@Scott1123](https://github.com/Scott1123)
